@@ -1,3 +1,4 @@
+  @import "tailwindcss";
 /* ===========================
         FONDO DEL MODAL
 =========================== */
@@ -211,7 +212,12 @@
     animation:aparecer .3s ease;
 }
 
-
+.descripcion{
+    color:#cfcfcf;
+    line-height:28px;
+    margin-bottom:25px;
+    text-align:justify;
+}
 
 /* ===========================
       DETALLES
@@ -328,16 +334,3 @@
 
 
 
-/* ===========================
-        RESPONSIVE
-=========================== */
-
-.menu {
-  display: flex;
-}
-
-@media(max-width:768px){
-  .menu{
-    flex-direction:column;
-  }
-}
