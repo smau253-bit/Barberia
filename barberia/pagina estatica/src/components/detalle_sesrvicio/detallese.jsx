@@ -8,7 +8,7 @@ function Detallese({ servicio, cerrar }) {
 
   const enviarWhatsApp = () => {
 
-    const numero = "525527620598"; // Cambia por el WhatsApp real de la barbería
+    const numero = "5217298028398"; // Cambia por el WhatsApp real de la barbería
 
 
     const mensaje = `
