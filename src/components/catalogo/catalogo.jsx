@@ -1,9 +1,10 @@
 import "./catalogo.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Detallese from "../detalle_sesrvicio/detallese";
 
 function Catalogo() {
+  const navigate = useNavigate();
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
 
   const productos = [
@@ -49,127 +50,86 @@ function Catalogo() {
     },
   ];
 
+  const volverAlInicio = () => {
+    navigate("/");
+  };
+
   return (
     <>
       <header className="productos-header">
-
         <div className="productos-logo">
-
           <h2>ELITECUT</h2>
-
           <span>BARBERÍA</span>
-
         </div>
 
         <nav>
-
           <ul className="productos-menu">
-
             <li>
-
-              <Link to="/servicios">
-                Servicios
-              </Link>
-
+              <Link to="/servicios">Servicios</Link>
             </li>
-
             <li>
-
-              <Link
-                to="/productos"
-                className="productos-activo"
-              >
+              <Link to="/catalogo" className="productos-activo">
                 Productos
               </Link>
-
             </li>
-
           </ul>
-
         </nav>
 
         <div className="productos-opciones">
-
           <input
             type="text"
             placeholder="Buscar producto..."
             className="productos-input"
           />
-
-          <button className="productos-salir">
-            Cerrar sesión
-          </button>
-
+          <button className="productos-salir">Cerrar sesión</button>
         </div>
-
       </header>
 
       <main className="productos-principal">
-
-        <h1>CATÁLOGO DE PRODUCTOS</h1>
-
-        <p className="productos-total">
-          {productos.length} resultados disponibles
-        </p>
+        <div className="productos-header-contenido">
+          <button className="productos-volver" onClick={volverAlInicio}>
+            ← Volver al inicio
+          </button>
+          <div>
+            <h1>CATÁLOGO DE PRODUCTOS</h1>
+            <p className="productos-total">{productos.length} resultados disponibles</p>
+          </div>
+        </div>
 
         <div className="productos-separador">
-
           <span>PERFUMES Y COLONIAS</span>
-
         </div>
 
         <section className="productos-grid">
-
           {productos.map((producto) => (
-
-            <div
-              className="producto-card"
-              key={producto.id}
-            >
-
+            <div className="producto-card" key={producto.id}>
               <img
                 src={producto.imagen}
                 alt={producto.nombre}
                 className="producto-imagen"
               />
-
               <div className="producto-info">
-
-                <h2 className="producto-precio">
-                  {producto.precio}
-                </h2>
-
-                <h3 className="producto-nombre">
-                  {producto.nombre}
-                </h3>
-
-                <p className="producto-texto">
-                  {producto.descripcion}
-                </p>
-<button
-  className="producto-boton"
-  onClick={() => setProductoSeleccionado(producto)}
->
-  VER DETALLES
-</button>
-
+                <h2 className="producto-precio">{producto.precio}</h2>
+                <h3 className="producto-nombre">{producto.nombre}</h3>
+                <p className="producto-texto">{producto.descripcion}</p>
+                <button
+                  className="producto-boton"
+                  onClick={() => setProductoSeleccionado(producto)}
+                >
+                  VER DETALLES
+                </button>
               </div>
-
             </div>
-
           ))}
-
         </section>
-
       </main>
 
-{productoSeleccionado && (
-  <Detallese
-    servicio={productoSeleccionado}
-    cerrar={() => setProductoSeleccionado(null)}
-  />
-)}
-
+      {productoSeleccionado && (
+        <Detallese
+          servicio={productoSeleccionado}
+          cerrar={() => setProductoSeleccionado(null)}
+        />
+      )}
     </>
   );
 }
