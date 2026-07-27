@@ -1,9 +1,10 @@
 import "./servicio.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Detallese from "../detalle_sesrvicio/detallese";
 
 function Servicio() {
+  const navigate = useNavigate();
   const [servicioSeleccionado, setServicioSeleccionado] = useState(null);
   const servicios = [
     {
@@ -62,108 +63,86 @@ function Servicio() {
     },
   ];
 
+  const volverAlInicio = () => {
+    navigate("/");
+  };
+
   return (
     <>
-      <header className="navbar">
-
-        <div className="logo">
+      <header className="servicios-header">
+        <div className="servicios-logo">
           <h2>ELITECUT</h2>
           <span>BARBERÍA</span>
         </div>
 
         <nav>
-          <ul className="menu">
+          <ul className="servicios-menu">
             <li>
-              <Link to="/servicios" className="activo">
+              <Link to="/servicios" className="servicios-activo">
                 Servicios
               </Link>
             </li>
-
             <li>
-              <Link to="/catalogo">
-                Productos
-              </Link>
+              <Link to="/catalogo">Productos</Link>
             </li>
           </ul>
         </nav>
 
-        <div className="acciones-nav">
-
+        <div className="servicios-opciones">
           <input
             type="text"
             placeholder="Buscar servicio..."
-            className="buscador"
+            className="servicios-input"
           />
-
-          <button className="cerrar">
-            Cerrar sesión
-          </button>
-
+          <button className="servicios-salir">Cerrar sesión</button>
         </div>
-
       </header>
 
-      <main className="contenedor">
+      <main className="servicios-principal">
+        <div className="servicios-header-contenido">
+          <button className="servicios-volver" onClick={volverAlInicio}>
+            ← Volver al inicio
+          </button>
+          <div>
+            <h1>CATÁLOGO DE SERVICIOS</h1>
+            <p className="servicios-total">{servicios.length} resultados disponibles</p>
+          </div>
+        </div>
 
-        <h1>CATÁLOGO DE SERVICIOS</h1>
+        <div className="servicios-separador">
+          <span>CORTES Y ESTILOS</span>
+        </div>
 
-        <div className="linea"></div>
-
-        <p className="cantidad">
-          {servicios.length} resultados disponibles
-        </p>
-
-        <section className="tarjetas">
-
+        <section className="servicios-grid">
           {servicios.map((servicio) => (
-
-            <div className="tarjeta" key={servicio.id}>
-
+            <div className="servicio-card" key={servicio.id}>
               <img
                 src={servicio.imagen}
                 alt={servicio.nombre}
+                className="servicio-imagen"
               />
-
-              <div className="contenido">
-
-                <h2 className="precio">
-                  {servicio.precio}
-                </h2>
-
-                <div className="titulo">
-
-                  <h3>{servicio.nombre}</h3>
-
-                  <span>{servicio.tiempo}</span>
-
-                </div>
-
-                <p>
-                  {servicio.descripcion}
-                </p>
-
+              <div className="servicio-info">
+                <h2 className="servicio-precio">{servicio.precio}</h2>
+                <h3 className="servicio-nombre">{servicio.nombre}</h3>
+                <p className="servicio-texto">{servicio.descripcion}</p>
                 <button
-                  className="btn-servicio"
+                  className="servicio-boton"
                   onClick={() => setServicioSeleccionado(servicio)}
                 >
                   VER DETALLES
                 </button>
-
               </div>
-
             </div>
-
           ))}
-
         </section>
-
       </main>
+
       {servicioSeleccionado && (
-  <Detallese
-    servicio={servicioSeleccionado}
-    cerrar={() => setServicioSeleccionado(null)}
-  />
-)}
+        <Detallese
+          servicio={servicioSeleccionado}
+          cerrar={() => setServicioSeleccionado(null)}
+        />
+      )}
     </>
   );
 }
