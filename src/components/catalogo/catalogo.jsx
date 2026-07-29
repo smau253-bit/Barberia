@@ -1,65 +1,77 @@
+// src/components/catalogo/catalogo.jsx
 import "./catalogo.css";
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
-import Detallese from "../detalle_sesrvicio/detallese";
+import { useState, useEffect } from "react";
+import axios from 'axios';
+import Detalleca from "../detalle_catalogo/detalleca"; // ← IMPORTAR DETALLECA
+
+const API_URL = 'http://localhost:5000/api/productos';
 
 function Catalogo() {
   const navigate = useNavigate();
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
+  const [productos, setProductos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [buscarTexto, setBuscarTexto] = useState("");
+  const [error, setError] = useState(null);
 
-  const productos = [
-    {
-      id: 1,
-      nombre: "COLONIA BLACK INTENSE",
-      precio: "$450",
-      descripcion:
-        "Fragancia masculina con notas de madera, cuero y ámbar. Larga duración, 100 ml.",
-      imagen: "/img/perfume1.jpg",
-    },
-    {
-      id: 2,
-      nombre: "EAU DE TOILETTE ELITE",
-      precio: "$320",
-      descripcion:
-        "Aroma fresco y sofisticado con toques cítricos y almizclados. Presentación 75 ml.",
-      imagen: "/img/perfume2.jpg",
-    },
-    {
-      id: 3,
-      nombre: "POMADA MATE",
-      precio: "$180",
-      descripcion:
-        "Pomada profesional para un acabado natural y fijación de larga duración.",
-      imagen: "/img/pomada1.jpg",
-    },
-    {
-      id: 4,
-      nombre: "CERA PREMIUM",
-      precio: "$150",
-      descripcion:
-        "Ideal para peinados modernos con textura y brillo natural.",
-      imagen: "/img/cera1.jpg",
-    },
-    {
-      id: 5,
-      nombre: "ACEITE PARA BARBA",
-      precio: "$210",
-      descripcion:
-        "Hidrata, fortalece y aporta brillo a la barba con ingredientes naturales.",
-      imagen: "/img/barba1.jpg",
-    },
-  ];
+  useEffect(() => {
+    cargarProductos();
+  }, []);
+
+  const cargarProductos = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get(API_URL);
+      if (response.data.success) {
+        setProductos(response.data.data);
+      } else {
+        setError('Error al cargar productos');
+      }
+    } catch (error) {
+      console.error('Error cargando productos:', error);
+      setError('Error al conectar con el servidor');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const productosFiltrados = buscarTexto.trim() === "" 
+    ? productos 
+    : productos.filter(p => 
+        p.nombre_producto.toLowerCase().includes(buscarTexto.toLowerCase()) ||
+        (p.descripcion && p.descripcion.toLowerCase().includes(buscarTexto.toLowerCase()))
+      );
 
   const volverAlInicio = () => {
     navigate("/");
+  };
+
+  const handleBuscar = (e) => {
+    setBuscarTexto(e.target.value);
+  };
+
+  const abrirModal = (producto) => {
+    console.log("🖱️ Click en VER DETALLES - Producto:", producto.nombre_producto);
+    setProductoSeleccionado(producto);
+  };
+
+  const cerrarModal = () => {
+    console.log("❌ Cerrando modal");
+    setProductoSeleccionado(null);
+  };
+
+  const formatearPrecio = (precio) => {
+    return `$${parseFloat(precio).toFixed(2)}`;
   };
 
   return (
     <>
       <header className="productos-header">
         <div className="productos-logo">
-          <h2>ELITECUT</h2>
-          <span>BARBERÍA</span>
+          <h2>SHELBY</h2>
+          <span>BARBER</span>
         </div>
 
         <nav>
@@ -80,8 +92,10 @@ function Catalogo() {
             type="text"
             placeholder="Buscar producto..."
             className="productos-input"
+            value={buscarTexto}
+            onChange={handleBuscar}
           />
-          <button className="productos-salir">Cerrar sesión</button>
+
         </div>
       </header>
 
@@ -92,7 +106,9 @@ function Catalogo() {
           </button>
           <div>
             <h1>CATÁLOGO DE PRODUCTOS</h1>
-            <p className="productos-total">{productos.length} resultados disponibles</p>
+            <p className="productos-total">
+              {loading ? 'Cargando...' : `${productosFiltrados.length} resultados disponibles`}
+            </p>
           </div>
         </div>
 
@@ -100,34 +116,56 @@ function Catalogo() {
           <span>PERFUMES Y COLONIAS</span>
         </div>
 
-        <section className="productos-grid">
-          {productos.map((producto) => (
-            <div className="producto-card" key={producto.id}>
-              <img
-                src={producto.imagen}
-                alt={producto.nombre}
-                className="producto-imagen"
-              />
-              <div className="producto-info">
-                <h2 className="producto-precio">{producto.precio}</h2>
-                <h3 className="producto-nombre">{producto.nombre}</h3>
-                <p className="producto-texto">{producto.descripcion}</p>
-                <button
-                  className="producto-boton"
-                  onClick={() => setProductoSeleccionado(producto)}
-                >
-                  VER DETALLES
-                </button>
+        {loading ? (
+          <div className="productos-loading">
+            <p>Cargando productos...</p>
+          </div>
+        ) : error ? (
+          <div className="productos-error">
+            <p>❌ {error}</p>
+            <button onClick={cargarProductos} className="productos-reintentar">
+              Reintentar
+            </button>
+          </div>
+        ) : productosFiltrados.length === 0 ? (
+          <div className="productos-vacio">
+            <p>No hay productos disponibles</p>
+            {buscarTexto && <p>No se encontraron productos con "{buscarTexto}"</p>}
+          </div>
+        ) : (
+          <section className="productos-grid">
+            {productosFiltrados.map((producto) => (
+              <div className="producto-card" key={producto.id_producto}>
+<img
+  src={producto.imagen || "/img/producto-default.jpg"}
+  alt={producto.nombre_producto}
+  className="producto-imagen"
+  onError={(e) => {
+    e.target.onerror = null;
+    e.target.src = "/img/producto-default.jpg";
+  }}
+/>
+                <div className="producto-info">
+                  <h2 className="producto-precio">{formatearPrecio(producto.precio)}</h2>
+                  <h3 className="producto-nombre">{producto.nombre_producto}</h3>
+                  <p className="producto-texto">{producto.descripcion || 'Sin descripción'}</p>
+                  <button
+                    className="servicio-boton"
+                    onClick={() => abrirModal(producto)} // ← CORREGIDO: producto en lugar de servicio
+                  >
+                    VER DETALLES
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
-        </section>
+            ))}
+          </section>
+        )}
       </main>
 
       {productoSeleccionado && (
-        <Detallese
+        <Detalleca
           servicio={productoSeleccionado}
-          cerrar={() => setProductoSeleccionado(null)}
+          cerrar={cerrarModal}
         />
       )}
     </>

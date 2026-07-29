@@ -1,35 +1,28 @@
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "./inicio.css";
 
 function Inicio() {
+  const navigate = useNavigate();
   return (
     <div className="inicio-hero">
       <div className="inicio-overlay"></div>
 
       <header className="inicio-header">
         <div className="inicio-logo">
-          <h2>SHENLY</h2>
+          <h2>SHELBY</h2>
           <span>BARBERÍA</span>
         </div>
 
-        <nav>
-          <ul className="inicio-menu">
-            <li>
-              <Link to="/servicios">Servicios</Link>
-            </li>
-            <li>
-              <Link to="/catalogo">Productos</Link>
-            </li>
-          </ul>
-        </nav>
+
 
         <div className="inicio-opciones">
-          <Link to="/login">
-            <button className="inicio-login">Iniciar sesión</button>
-          </Link>
-          <Link to="/registro">
-            <button className="inicio-registro">Registrarse</button>
-          </Link>
+<Link to="/sesion">
+  <button className="inicio-login">
+    Iniciar sesión
+  </button>
+</Link>
+
         </div>
       </header>
 
@@ -37,7 +30,7 @@ function Inicio() {
         <p className="inicio-subtitulo">DESDE 2010 • CIUDAD DE MÉXICO</p>
         
         <h1>
-          SHENLY
+          SHELBY
           <br />
           <span>BARBER</span>
         </h1>
@@ -53,9 +46,7 @@ function Inicio() {
           <Link to="/servicios">
             <button className="inicio-servicios">VER SERVICIOS</button>
           </Link>
-          <Link to="/registro">
-            <button className="inicio-crear">CREAR CUENTA</button>
-          </Link>
+
         </div>
       </main>
     </div>

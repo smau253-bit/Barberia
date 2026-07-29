@@ -1,78 +1,77 @@
+// Servicio.jsx - VERSIÓN LIMPIA (Solo con el modal real)
 import "./servicio.css";
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from 'axios';
 import Detallese from "../detalle_sesrvicio/detallese";
+
+const API_URL = 'http://localhost:5000/api/servicios';
 
 function Servicio() {
   const navigate = useNavigate();
   const [servicioSeleccionado, setServicioSeleccionado] = useState(null);
-  const servicios = [
-    {
-      id: 1,
-      nombre: "CORTE CLÁSICO",
-      precio: "$80",
-      tiempo: "45 min",
-      descripcion:
-        "Corte de cabello tradicional con acabado profesional y estilo personalizado a tu gusto.",
-      imagen: "/img/corte1.jpg",
-    },
-    {
-      id: 2,
-      nombre: "CORTE + BARBA",
-      precio: "$120",
-      tiempo: "75 min",
-      descripcion:
-        "La combinación perfecta de corte de cabello y arreglo completo de barba.",
-      imagen: "/img/corte2.jpg",
-    },
-    {
-      id: 3,
-      nombre: "AFEITADO TRADICIONAL",
-      precio: "$100",
-      tiempo: "60 min",
-      descripcion:
-        "Afeitado clásico con navaja, toalla caliente y productos de primera calidad.",
-      imagen: "/img/corte3.jpg",
-    },
-    {
-      id: 4,
-      nombre: "ARREGLO DE BARBA",
-      precio: "$70",
-      tiempo: "30 min",
-      descripcion:
-        "Definición y perfilado preciso de barba para un aspecto elegante y cuidado.",
-      imagen: "/img/corte4.jpg",
-    },
-    {
-      id: 5,
-      nombre: "CORTE INFANTIL",
-      precio: "$60",
-      tiempo: "35 min",
-      descripcion:
-        "Corte especializado para niños con un ambiente cómodo y divertido.",
-      imagen: "/img/corte5.jpg",
-    },
-    {
-      id: 6,
-      nombre: "PAQUETE PREMIUM",
-      precio: "$180",
-      tiempo: "90 min",
-      descripcion:
-        "Incluye corte, barba, lavado capilar y peinado profesional.",
-      imagen: "/img/corte6.jpg",
-    },
-  ];
+  const [servicios, setServicios] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [buscarTexto, setBuscarTexto] = useState("");
+  const [error, setError] = useState(null);
+
+  // Cargar servicios desde la base de datos
+  useEffect(() => {
+    cargarServicios();
+  }, []);
+
+  const cargarServicios = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get(API_URL);
+      if (response.data.success) {
+        setServicios(response.data.data);
+      } else {
+        setError('Error al cargar servicios');
+      }
+    } catch (error) {
+      console.error('Error cargando servicios:', error);
+      setError('Error al conectar con el servidor');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Filtrar servicios por búsqueda
+  const serviciosFiltrados = buscarTexto.trim() === "" 
+    ? servicios 
+    : servicios.filter(s => 
+        s.nombre_servicio.toLowerCase().includes(buscarTexto.toLowerCase()) ||
+        (s.descripcion && s.descripcion.toLowerCase().includes(buscarTexto.toLowerCase()))
+      );
 
   const volverAlInicio = () => {
     navigate("/");
+  };
+
+  const handleBuscar = (e) => {
+    setBuscarTexto(e.target.value);
+  };
+
+  // Función para abrir el modal
+  const abrirModal = (servicio) => {
+    console.log("🖱️ Click en VER DETALLES - Servicio:", servicio.nombre_servicio);
+    setServicioSeleccionado(servicio);
+  };
+
+  // Función para cerrar el modal
+  const cerrarModal = () => {
+    console.log("❌ Cerrando modal");
+    setServicioSeleccionado(null);
   };
 
   return (
     <>
       <header className="servicios-header">
         <div className="servicios-logo">
-          <h2>ELITECUT</h2>
-          <span>BARBERÍA</span>
+          <h2>SHELBY</h2>
+          <span>BARBER</span>
         </div>
 
         <nav>
@@ -93,8 +92,10 @@ function Servicio() {
             type="text"
             placeholder="Buscar servicio..."
             className="servicios-input"
+            value={buscarTexto}
+            onChange={handleBuscar}
           />
-          <button className="servicios-salir">Cerrar sesión</button>
+
         </div>
       </header>
 
@@ -105,7 +106,9 @@ function Servicio() {
           </button>
           <div>
             <h1>CATÁLOGO DE SERVICIOS</h1>
-            <p className="servicios-total">{servicios.length} resultados disponibles</p>
+            <p className="servicios-total">
+              {loading ? 'Cargando...' : `${serviciosFiltrados.length} resultados disponibles`}
+            </p>
           </div>
         </div>
 
@@ -113,34 +116,57 @@ function Servicio() {
           <span>CORTES Y ESTILOS</span>
         </div>
 
-        <section className="servicios-grid">
-          {servicios.map((servicio) => (
-            <div className="servicio-card" key={servicio.id}>
-              <img
-                src={servicio.imagen}
-                alt={servicio.nombre}
-                className="servicio-imagen"
-              />
-              <div className="servicio-info">
-                <h2 className="servicio-precio">{servicio.precio}</h2>
-                <h3 className="servicio-nombre">{servicio.nombre}</h3>
-                <p className="servicio-texto">{servicio.descripcion}</p>
-                <button
-                  className="servicio-boton"
-                  onClick={() => setServicioSeleccionado(servicio)}
-                >
-                  VER DETALLES
-                </button>
+        {loading ? (
+          <div className="servicios-loading">
+            <p>Cargando servicios...</p>
+          </div>
+        ) : error ? (
+          <div className="servicios-error">
+            <p>❌ {error}</p>
+            <button onClick={cargarServicios} className="servicios-reintentar">
+              Reintentar
+            </button>
+          </div>
+        ) : serviciosFiltrados.length === 0 ? (
+          <div className="servicios-vacio">
+            <p>No hay servicios disponibles</p>
+            {buscarTexto && <p>No se encontraron servicios con "{buscarTexto}"</p>}
+          </div>
+        ) : (
+          <section className="servicios-grid">
+            {serviciosFiltrados.map((servicio) => (
+              <div className="servicio-card" key={servicio.id_servicio}>
+                <img
+                  src={servicio.imagen || "/img/servicio-default.jpg"}
+                  alt={servicio.nombre_servicio}
+                  className="servicio-imagen"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "/img/servicio-default.jpg";
+                  }}
+                />
+                <div className="servicio-info">
+                  <h2 className="servicio-precio">${parseFloat(servicio.precio).toFixed(2)}</h2>
+                  <h3 className="servicio-nombre">{servicio.nombre_servicio}</h3>
+                  <p className="servicio-texto">{servicio.descripcion || 'Sin descripción'}</p>
+                  <button
+                    className="servicio-boton"
+                    onClick={() => abrirModal(servicio)}
+                  >
+                    VER DETALLES
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
-        </section>
+            ))}
+          </section>
+        )}
       </main>
 
+      {/* MODAL REAL - Se muestra cuando hay un servicio seleccionado */}
       {servicioSeleccionado && (
         <Detallese
           servicio={servicioSeleccionado}
-          cerrar={() => setServicioSeleccionado(null)}
+          cerrar={cerrarModal}
         />
       )}
     </>

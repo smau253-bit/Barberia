@@ -1,136 +1,64 @@
+// src/detalle_sesrvicio/detallese.jsx
+import React from "react";
 import "./detallese.css";
-import { FaTimes, FaClock, FaCircle, FaWhatsapp } from "react-icons/fa";
 
-function Detallese({ servicio, cerrar }) {
+const Detallese = ({ servicio, cerrar }) => {
+  // Si no hay servicio, no mostrar nada
+  if (!servicio) {
+    console.log("❌ No hay servicio para mostrar");
+    return null;
+  }
 
-  if (!servicio) return null;
-
-
-  const enviarWhatsApp = () => {
-
-    const numero = "5217298028398"; // Cambia por el WhatsApp real de la barbería
-
-
-    const mensaje = `
-Hola, me gustaría agendar un servicio.
-
-Servicio: ${servicio.nombre}
-
-Precio: ${servicio.precio}
-
-Descripción:
-${servicio.descripcion}
-
-Duración: ${servicio.duracion}
-
-¿Me pueden proporcionar disponibilidad?
-`;
-
-
-    const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`;
-
-
-    window.open(url, "_blank");
-
-  };
-
+  console.log("✅ Mostrando modal para:", servicio.nombre_servicio);
 
   return (
-    <div className="modal">
-
-      <div className="modal-contenedor">
-
-
-        <button className="exit" onClick={cerrar}>
-          <FaTimes />
+    <div className="modal-overlay" onClick={cerrar}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <button className="modal-cerrar" onClick={cerrar}>
+          ✕
         </button>
-
-
+        
         <div className="modal-imagen">
-
-          <img
-            src={servicio.imagen}
-            alt={servicio.nombre}
+          <img 
+            src={servicio.imagen || "/img/servicio-default.jpg"} 
+            alt={servicio.nombre_servicio || servicio.nombre}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "/img/servicio-default.jpg";
+            }}
           />
-
         </div>
-
-
+        
         <div className="modal-info">
-
-
-          <div className="titulo-precio">
-
-            <h2>
-              {servicio.nombre}
-            </h2>
-
-            <span>
-              {servicio.precio}
-            </span>
-
-          </div>
-
-
-
-          <p className="descripcion">
-            {servicio.descripcion}
-          </p>
-
-
-
-          <div className="detalles">
-
-
-            <div className="duracion">
-
-              <FaClock />
-
-              <span>
-                Duración: {servicio.duracion}
-              </span>
-
+          <h2>{servicio.nombre_servicio || servicio.nombre}</h2>
+          <p className="modal-precio">${parseFloat(servicio.precio).toFixed(2)}</p>
+          <p className="modal-descripcion">{servicio.descripcion || 'Sin descripción'}</p>
+          
+          <div className="modal-detalles">
+            <div className="modal-detalle-item">
+              <span className="modal-detalle-label">⏱ Tiempo estimado</span>
+              <span className="modal-detalle-valor">{servicio.tiempo || '30-45 min'}</span>
             </div>
-
-
-
-            <div className="estado disponible">
-
-              <FaCircle />
-
-              <span>
-                Disponible
-              </span>
-
+            <div className="modal-detalle-item">
+              <span className="modal-detalle-label">📋 Categoría</span>
+              <span className="modal-detalle-valor">Corte y Estilo</span>
             </div>
-
-
           </div>
-
-
-
-          <button
-            className="btn-whatsapp"
-            onClick={enviarWhatsApp}
+          
+          <button 
+            className="modal-agendar" 
+            onClick={() => {
+              const mensaje = `Hola, me interesa agendar el servicio: ${servicio.nombre_servicio} ($${parseFloat(servicio.precio).toFixed(2)})`;
+              const url = `https://wa.me/5217221234567?text=${encodeURIComponent(mensaje)}`;
+              window.open(url, '_blank');
+            }}
           >
-
-            <FaWhatsapp />
-
-            Agendar por WhatsApp
-
+            AGENDAR CITA
           </button>
-
-
-
         </div>
-
-
       </div>
-
-
     </div>
   );
-}
-
+};
 
 export default Detallese;
